@@ -19,8 +19,6 @@
                   </div>
                 </v-card-title>
               </v-flex>
-              <v-checkbox class="myCheck" dark color="white" light v-model="selected" label="John" value="John"></v-checkbox>
-
             </v-layout>
 
           </v-card>
@@ -35,9 +33,6 @@
         <v-flex v-for="i in 10" :key="`${i}`" xs12 class="card">
           <v-card color="cyan darken-2" class="white--text">
             <v-layout>
-              <v-flex xs5>
-                <v-img src="https://cdn.vuetifyjs.com/images/cards/foster.jpg" height="125px" contain></v-img>
-              </v-flex>
               <v-flex xs7>
                 <v-card-title primary-title>
                   <div>
@@ -47,31 +42,47 @@
                   </div>
                 </v-card-title>
               </v-flex>
+              <v-checkbox class="myCheck" dark color="white" light v-model="selected" label="John" value="John"></v-checkbox>
             </v-layout>
           </v-card>
         </v-flex>
 
       </vuescroll>
     </div>
+
+    <div class="three">
+      <div class="box">
+        <v-flex sm12>
+          <v-text-field value="John Doe" label="Outline" outline readonly></v-text-field>
+        </v-flex>
+
+        <v-flex sm12>
+          <v-text-field value="John Doe" label="Outline" outline readonly></v-text-field>
+        </v-flex>
+
+        <v-flex sm12>
+          <v-text-field value="John Doe" label="Outline" outline readonly></v-text-field>
+        </v-flex>
+
+      </div>
+    </div>
   </div>
 
-  <!-- <v-btn depressed color="success" block>Explore</v-btn> -->
   <div class="text-xs-center">
     <v-dialog v-model="dialog" width="500">
       <template v-slot:activator="{ on }">
         <v-btn depressed color="success" block dark v-on="on">
-          Expolore
+          Explore
         </v-btn>
       </template>
 
       <v-card>
         <v-card-title class="headline grey lighten-2" primary-title>
-          Privacy Policy
+          Ваша ссылка
         </v-card-title>
 
         <v-card-text>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis
-          aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          [ССЫЛКА]
         </v-card-text>
 
         <v-divider></v-divider>
@@ -79,7 +90,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary" flat @click="dialog = false">
-            I accept
+            Закрыть
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -107,7 +118,7 @@ export default {
         scrollPanel: {},
         rail: {},
         bar: {
-          keepShow: true
+          // keepShow: true
         }
       },
       selected: []
@@ -120,30 +131,39 @@ export default {
 .myWrap {
   width: 100%;
   height: 100%;
-  border: 3px dashed #645a4e;
+  /* border: 3px dashed #645a4e; */
 }
 
 .content {
-  background: black;
+  /* background: black; */
   position: relative;
-  height: 95%;
+  height: 85%;
 }
 
 .one {
-  background: yellow;
+  /* background: yellow; */
   position: absolute;
   top: 0;
   right: 0;
-  width: 50%;
+  width: 30%;
   height: 100%;
 }
 
 .two {
-  background: blue;
+  /* background: blue; */
   position: absolute;
   top: 0;
   left: 0;
-  width: 50%;
+  width: 30%;
+  height: 100%;
+}
+
+.three {
+  /* background: pink; */
+  position: absolute;
+  top: 0;
+  left: 30%;
+  width: 40%;
   height: 100%;
 }
 
@@ -155,7 +175,12 @@ export default {
 }
 
 .myCheck {
-  margin-right: 5%;
-  margin-top: 10%;
+  /* margin-right: 5%; */
+  margin-top: 15%;
+  margin-left: 10%;
+}
+
+.box {
+  margin: 1.6%;
 }
 </style>

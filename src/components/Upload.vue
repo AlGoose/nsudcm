@@ -1,5 +1,5 @@
 <template>
-<div class="wrap">
+<div class="myWrap">
   <div class="tags">
 
     <div class="card">
@@ -95,12 +95,13 @@ export default {
   position: relative;
   width: 50%;
   margin-left: 25%;
-  margin-top: 5%;
+  margin-top: 1%;
 }
 
 .button {
   width: 100%;
   margin-left: 0;
+  margin-bottom: 3%;
   padding-left: 0;
   color: white;
 }

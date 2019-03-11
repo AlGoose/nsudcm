@@ -1,5 +1,5 @@
 <template>
-<div class="wrap">
+<div class="myWrap">
   <div class="tags">
     <v-combobox v-model="chips" label="Tags" chips clearable solo multiple>
       <template v-slot:selection="data">
@@ -30,7 +30,7 @@ export default {
   },
   data() {
     return {
-      chips: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],
+      chips: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       selectedFile: null,
       ops: {
         vuescroll: {
@@ -66,13 +66,13 @@ export default {
   width: 50%;
   height: 50%;
   margin-left: 25%;
-  background: yellow;
+  /* background: yellow; */
 }
 
 .wrap {
   width: 100%;
   height: 100%;
-  background: grey;
+  /* background: grey; */
   /* border: 3px dashed #645a4e; */
 }
 
@@ -80,8 +80,8 @@ export default {
   position: relative;
   width: 50%;
   margin-left: 25%;
-  margin-top: 5%;
-  background: red;
+  margin-top: 1%;
+  /* background: red; */
 }
 
 li {
