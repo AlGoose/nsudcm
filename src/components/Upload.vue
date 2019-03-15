@@ -20,13 +20,15 @@
       </template>
     </v-combobox>
 
-    <v-btn class="button" depressed color="success" @click="readTags">Send</v-btn>
+    <v-btn class="button" depressed color="success" @click="submitFile">Submit</v-btn>
 
   </div>
 </div>
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data() {
     return {
@@ -45,8 +47,23 @@ export default {
       this.selectedFile = event.target.files[0]
     },
 
-    readTags() {
+    submitFile() {
+      let formData = new FormData();
+      formData.append('file', this.selectedFile);
+      console.log('>> formData >> ', formData);
 
+      axios.post('http://localhost:8042/instances',
+          formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        ).then(function () {
+          console.log('SUCCESS!!');
+        })
+        .catch(function () {
+          console.log('FAILURE!!');
+        });
     }
   }
 }

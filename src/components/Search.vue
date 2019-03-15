@@ -8,11 +8,11 @@
         </v-chip>
       </template>
     </v-combobox>
-    <v-btn class="button" depressed color="success">Search</v-btn>
+    <v-btn class="button" depressed color="success" @click="search">Search</v-btn>
   </div>
 
   <div class="searchResult">
-    <vuescroll :ops="ops" >
+    <vuescroll :ops="ops">
       <p v-for="item in chips" :key="item.id" color="light-green" text-color="white">{{ item }}</p>
       <!-- <v-chip v-for="item in chips" :key="item.id" color="light-green" text-color="white">{{ item }}</v-chip> -->
     </vuescroll>
@@ -23,6 +23,7 @@
 
 <script>
 import vuescroll from 'vuescroll'
+import axios from 'axios'
 
 export default {
   components: {
@@ -53,8 +54,15 @@ export default {
       this.chips = [...this.chips]
     },
 
-    readTags() {
-
+    search() {
+      axios
+        .get('http://localhost:8042/patients/')
+        .then(function(res) {
+          console.log(res);
+        })
+        .catch(function(err) {
+          console.log(err.message);
+        });
     }
   }
 }

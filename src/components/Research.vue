@@ -5,7 +5,7 @@
       <vuescroll :ops="ops">
 
         <v-flex v-for="(item, index) in 10" :key="index" xs12 class="card">
-          <v-card color="cyan darken-2" class="white--text">
+          <v-card hover flat color="cyan darken-2" class="white--text">
             <v-layout>
               <v-flex xs5>
                 <v-img src="https://cdn.vuetifyjs.com/images/cards/foster.jpg" height="125px" contain></v-img>
@@ -30,19 +30,19 @@
     <div class="two">
       <vuescroll :ops="ops">
 
-        <v-flex v-for="i in 10" :key="`${i}`" xs12 class="card">
-          <v-card color="cyan darken-2" class="white--text">
+        <v-flex v-for="(item, index) in patients" :key="item.data.MainDicomTags.PatientID" xs12 class="card">
+          <v-card hover flat color="cyan darken-2" class="white--text" @click="showInfo(index)">
             <v-layout>
               <v-flex xs7>
                 <v-card-title primary-title>
                   <div>
-                    <div class="headline">Supermodel</div>
-                    <div>Foster the People</div>
-                    <div>(2014)</div>
+                    <div class="headline">{{item.data.MainDicomTags.PatientName}}</div>
+                    <div>{{item.data.MainDicomTags.PatientID}}</div>
+                    <div>{{item.data.MainDicomTags.PatientSex}}</div>
                   </div>
                 </v-card-title>
               </v-flex>
-              <v-checkbox class="myCheck" dark color="white" light v-model="selected" label="John" value="John"></v-checkbox>
+              <v-checkbox class="myCheck" dark color="white" light v-model="selected" :label="item.data.MainDicomTags.PatientName" :value="item.data.MainDicomTags.PatientID"></v-checkbox>
             </v-layout>
           </v-card>
         </v-flex>
@@ -53,15 +53,15 @@
     <div class="three">
       <div class="box">
         <v-flex sm12>
-          <v-text-field value="John Doe" label="Outline" outline readonly></v-text-field>
+          <v-text-field :value="selectedPatient.name" label="Name" outline readonly></v-text-field>
         </v-flex>
 
         <v-flex sm12>
-          <v-text-field value="John Doe" label="Outline" outline readonly></v-text-field>
+          <v-text-field :value="selectedPatient.id" label="ID" outline readonly></v-text-field>
         </v-flex>
 
         <v-flex sm12>
-          <v-text-field value="John Doe" label="Outline" outline readonly></v-text-field>
+          <v-text-field :value="selectedPatient.sex" label="Sex" outline readonly></v-text-field>
         </v-flex>
 
       </div>
@@ -101,6 +101,7 @@
 
 <script>
 import vuescroll from 'vuescroll'
+import axios from 'axios'
 
 export default {
   components: {
@@ -117,13 +118,51 @@ export default {
         },
         scrollPanel: {},
         rail: {},
-        bar: {
-          // keepShow: true
-        }
+        bar: {},
       },
-      selected: []
+      selected: [],
+      patientsIDS: null,
+      patients: [],
+      selectedPatient: {
+        name: '',
+        id: '',
+        sex: '',
+      }
     }
   },
+  created() {
+    var self = this;
+    axios
+      .get('http://localhost:8042/patients/')
+      .then(function(res) {
+        self.patientsIDS = res.data;
+        self.patientsIDS.forEach(function(element) {
+          // console.log('http://localhost:8042/patients/'+element)
+          axios
+            .get('http://localhost:8042/patients/' + element)
+            .then(function(res) {
+              self.patients.push(res);
+              // console.log(self.patients);
+            })
+            .catch(function(err) {
+              console.log(err.message);
+            });
+        })
+      })
+      .catch(function(err) {
+        console.log(err.message);
+      });
+  },
+
+  methods: {
+    showInfo(index) {
+      this.selectedPatient = {
+        name: this.patients[index].data.MainDicomTags.PatientName,
+        id: this.patients[index].data.MainDicomTags.PatientID,
+        sex: this.patients[index].data.MainDicomTags.PatientSex,
+      }
+    }
+  }
 }
 </script>
 
