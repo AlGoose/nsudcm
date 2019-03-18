@@ -30,19 +30,24 @@
     <div class="two">
       <vuescroll :ops="ops">
 
-        <v-flex v-for="(item, index) in patients" :key="item.data.MainDicomTags.PatientID" xs12 class="card">
+        <v-flex v-for="(item, index) in patients" :key="index" xs12 class="card">
           <v-card hover flat color="cyan darken-2" class="white--text" @click="showInfo(index)">
-            <v-layout>
-              <v-flex xs7>
+            <v-layout row wrap>
+              <v-flex xs11>
                 <v-card-title primary-title>
                   <div>
-                    <div class="headline">{{item.data.MainDicomTags.PatientName}}</div>
-                    <div>{{item.data.MainDicomTags.PatientID}}</div>
-                    <div>{{item.data.MainDicomTags.PatientSex}}</div>
+                    <div class="headline">{{item.data.PatientName}}</div>
+
+                    <!-- <div>{{item.data.MainDicomTags.PatientID}}</div>
+                    <div>{{item.data.MainDicomTags.PatientSex}}</div> -->
+                    <!-- <div><v-checkbox dark color="white" light v-model="selected" :value="item.data.MainDicomTags.PatientID"></v-checkbox></div> -->
+
                   </div>
                 </v-card-title>
               </v-flex>
-              <v-checkbox class="myCheck" dark color="white" light v-model="selected" :label="item.data.MainDicomTags.PatientName" :value="item.data.MainDicomTags.PatientID"></v-checkbox>
+              <v-flex xs1>
+                <v-checkbox dark color="white" light v-model="selected" :value="instancesIDS[index]"></v-checkbox>
+              </v-flex>
             </v-layout>
           </v-card>
         </v-flex>
@@ -62,6 +67,18 @@
 
         <v-flex sm12>
           <v-text-field :value="selectedPatient.sex" label="Sex" outline readonly></v-text-field>
+        </v-flex>
+
+        <v-flex sm12>
+          <v-text-field :value="selectedPatient.instanceid" label="InstanceID" outline readonly></v-text-field>
+        </v-flex>
+
+        <v-flex sm12>
+          <ul>
+            <li v-for="item in selected">
+              {{ item }}
+            </li>
+          </ul>
         </v-flex>
 
       </div>
@@ -116,40 +133,48 @@ export default {
           sizeStrategy: 'percent',
           detectResize: true
         },
-        scrollPanel: {},
+        scrollPanel: {
+          scrollingX: false,
+        },
         rail: {},
-        bar: {},
+        bar: {
+          keepShow: true,
+        },
       },
       selected: [],
       patientsIDS: null,
+      instancesIDS: null,
       patients: [],
       selectedPatient: {
         name: '',
         id: '',
         sex: '',
+        instanceid: '',
       }
     }
   },
   created() {
     var self = this;
     axios
-      .get('http://localhost:8042/patients/')
+      .get('http://localhost:8042/instances/')
       .then(function(res) {
-        self.patientsIDS = res.data;
-        self.patientsIDS.forEach(function(element) {
-          // console.log('http://localhost:8042/patients/'+element)
+        self.instancesIDS = res.data;
+        self.instancesIDS.forEach(function(element) {
           axios
-            .get('http://localhost:8042/patients/' + element)
+            .get('http://localhost:8042/instances/' + element + '/simplified-tags')
             .then(function(res) {
               self.patients.push(res);
-              // console.log(self.patients);
+              // eslint-disable-next-line
+              console.log(res);
             })
             .catch(function(err) {
+              // eslint-disable-next-line
               console.log(err.message);
             });
         })
       })
       .catch(function(err) {
+        // eslint-disable-next-line
         console.log(err.message);
       });
   },
@@ -157,9 +182,10 @@ export default {
   methods: {
     showInfo(index) {
       this.selectedPatient = {
-        name: this.patients[index].data.MainDicomTags.PatientName,
-        id: this.patients[index].data.MainDicomTags.PatientID,
-        sex: this.patients[index].data.MainDicomTags.PatientSex,
+        name: this.patients[index].data.PatientName,
+        id: this.patients[index].data.PatientID,
+        sex: this.patients[index].data.PatientSex,
+        instanceid: this.instancesIDS[index],
       }
     }
   }
