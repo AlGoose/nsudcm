@@ -7,6 +7,7 @@
         <v-btn to="/upload" color="white" flat round exact>Upload</v-btn>
         <v-btn to="/search" color="white" flat round exact>Search</v-btn>
         <v-btn to="/research" color="white" flat round exact>Research</v-btn>
+        <v-btn to="/employees" color="white" flat round exact>Employees</v-btn>
       </v-layout>
     </v-footer>
     <router-view></router-view>
@@ -22,6 +23,7 @@ import Home from './components/Home'
 import Upload from './components/Upload'
 import Search from './components/Search'
 import Research from './components/Research'
+import Employees from './components/Employees'
 
 Vue.use(VueRouter)
 
@@ -41,6 +43,10 @@ const router = new VueRouter({
     {
       path: '/research',
       component: Research
+    },
+    {
+      path: '/employees',
+      component: Employees
     }
   ]
 })

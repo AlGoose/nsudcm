@@ -10,7 +10,7 @@
     </div>
 
     <v-btn class="button" depressed color="red accent-2" @click="$refs.inputUpload.click()">Upload</v-btn>
-    <input id="input" v-show="false" ref="inputUpload" type="file" @change="onFileSelected">
+    <input id="file" name="file" v-show="false" ref="inputUpload" type="file" @change="onFileSelected">
 
     <v-combobox v-model="chips" label="Your tags" chips clearable solo multiple>
       <template v-slot:selection="data">
@@ -50,15 +50,16 @@ export default {
     submitFile() {
       let formData = new FormData();
       formData.append('file', this.selectedFile);
-      console.log('>> formData >> ', formData);
-
-      axios.post('http://localhost:8042/instances',
+      formData.append('tag','erzhan');
+      console.log('>> formData >> ', this.selectedFile);
+      //8042/instances
+      axios.post('http://localhost:2019/add',
           formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
             }
-          }
-        ).then(function () {
+          },
+        ).then(function (response) {
           console.log('SUCCESS!!');
         })
         .catch(function () {

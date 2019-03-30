@@ -1,9 +1,9 @@
 <template>
-  <div class="myWrap"></div>
+<div class="myWrap"></div>
 </template>
 
 <style scoped>
-.myWrap{
+.myWrap {
   width: 100%;
   height: 100%;
   background-image: url(../assets/wallpaper.png);

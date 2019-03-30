@@ -4,18 +4,18 @@
     <div class="one">
       <vuescroll :ops="ops">
 
-        <v-flex v-for="(item, index) in 10" :key="index" xs12 class="card">
+        <v-flex v-for="(item, index) in employees" :key="index" xs12 class="card">
           <v-card hover flat color="cyan darken-2" class="white--text">
             <v-layout>
-              <v-flex xs5>
+              <!-- <v-flex xs5>
                 <v-img src="https://cdn.vuetifyjs.com/images/cards/foster.jpg" height="125px" contain></v-img>
-              </v-flex>
-              <v-flex xs7>
+              </v-flex> -->
+              <v-flex xs12>
                 <v-card-title primary-title>
                   <div>
-                    <div class="headline">Supermodel</div>
-                    <div>Foster the People</div>
-                    <div>(2014)</div>
+                    <div class="headline">{{item.surname + ' ' + item.name}}</div>
+                    <div>{{item.position}}</div>
+                    <div>{{item.email}}</div>
                   </div>
                 </v-card-title>
               </v-flex>
@@ -106,6 +106,9 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
+          <v-btn color="success" flat @click="sendMail">
+            Отправить
+          </v-btn>
           <v-btn color="primary" flat @click="dialog = false">
             Закрыть
           </v-btn>
@@ -150,7 +153,8 @@ export default {
         id: '',
         sex: '',
         instanceid: '',
-      }
+      },
+      employees: null,
     }
   },
   created() {
@@ -177,6 +181,18 @@ export default {
         // eslint-disable-next-line
         console.log(err.message);
       });
+
+    axios
+        .get('http://localhost:2019/employees/')
+        .then(function(res) {
+          self.employees = res.data;
+          // eslint-disable-next-line
+          console.log(self.employees);
+        })
+        .catch(function(err) {
+          // eslint-disable-next-line
+          console.log(err.message);
+        });
   },
 
   methods: {
@@ -187,6 +203,44 @@ export default {
         sex: this.patients[index].data.PatientSex,
         instanceid: this.instancesIDS[index],
       }
+    },
+    sendMail() {
+      var self = this;
+      var json = JSON.stringify(this.instancesIDS);
+      let objJsonB64 = Buffer.from(json).toString("base64");
+      // eslint-disable-next-line
+      console.log(json.toString('base64'));
+
+      const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.VUE_APP_SENDGRID_API_KEY);
+      const msg = {
+        to: 'alex1232131@mail.ru',
+        from: 'alex@nsudcm.com',
+        subject: 'Sending with SendGrid is Fun',
+        // text: 'and easy to do anywhere, even with Node.js',
+        html: '<p>Here’s an attachment for you!</p>',
+        attachments: [{
+          content: objJsonB64,
+          filename: 'attachment.json',
+          type: 'application/json',
+          disposition: 'attachment',
+          content_id: 'mytext'
+        }, ],
+      };
+
+      sgMail
+        .send(msg)
+        .then(() => {
+          // eslint-disable-next-line
+          console.log("Success!");
+          self.dialog = false;
+        })
+        .catch(error => {
+          // eslint-disable-next-line
+          console.log("Failed!");
+          // eslint-disable-next-line
+          console.error(error.toString());
+        });
     }
   }
 }
