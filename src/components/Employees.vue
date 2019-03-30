@@ -57,14 +57,13 @@
         <v-icon small @click="deleteItem(props.item)">delete</v-icon>
       </td>
     </template>
-    <template v-slot:no-data>
-      <v-btn color="primary" @click="initialize">Reset</v-btn>
-    </template>
   </v-data-table>
 </div>
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data: () => ({
     search: '',
@@ -128,28 +127,19 @@ export default {
   },
 
   created() {
-    this.initialize()
+    let self = this;
+    axios
+    .get('http://localhost:2019/api/employees',)
+    .then(function (res) {
+        self.desserts = res.data;
+      })
+      .catch(function (err) {
+        // eslint-disable-next-line
+        console.log(err.message);
+      });
   },
 
   methods: {
-    initialize() {
-      this.desserts = [{
-          surname: 'Frozen Yogurt',
-          name: 159,
-          patronymic: 6.0,
-          position: 24,
-          email: 4.0
-        },
-        {
-          surname: 'Ice cream sandwich',
-          name: 237,
-          patronymic: 9.0,
-          position: 37,
-          email: 4.3
-        }
-      ]
-    },
-
     editItem(item) {
       this.editedIndex = this.desserts.indexOf(item)
       this.editedItem = Object.assign({}, item)
@@ -157,8 +147,24 @@ export default {
     },
 
     deleteItem(item) {
+      let self = this;
       const index = this.desserts.indexOf(item)
-      confirm('Are you sure you want to delete this item?') && this.desserts.splice(index, 1)
+      if(confirm('Вы точно хотите удалить?')){
+        let data = JSON.stringify(item._id);
+        axios.delete('http://localhost:2019/api/employees/' + item._id,
+            data, {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            },
+          ).then(function () {
+            self.desserts.splice(index, 1)
+          })
+          .catch(function (err) {
+            // eslint-disable-next-line
+            console.log(err.message);
+          });
+      }
     },
 
     close() {
@@ -170,10 +176,37 @@ export default {
     },
 
     save() {
+      let self = this;
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem)
+        let data = JSON.stringify(this.editedItem);
+        axios.put('http://localhost:2019/api/employees',
+            data, {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            },
+          ).then(function (res) {
+            Object.assign(self.desserts[self.editedIndex], res.data)
+          })
+          .catch(function (err) {
+            // eslint-disable-next-line
+            console.log(err.message);
+          });
       } else {
-        this.desserts.push(this.editedItem)
+        let data = JSON.stringify(this.editedItem);
+        axios.post('http://localhost:2019/api/employees',
+            data, {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            },
+          ).then(function (res) {
+            self.desserts.push(res.data)
+          })
+          .catch(function (err) {
+            // eslint-disable-next-line
+            console.log(err.message);
+          });
       }
       this.close()
     }
