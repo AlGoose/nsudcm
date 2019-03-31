@@ -50,20 +50,18 @@ export default {
     submitFile() {
       let formData = new FormData();
       formData.append('file', this.selectedFile);
-      formData.append('tag','erzhan');
-      console.log('>> formData >> ', this.selectedFile);
       //8042/instances
-      axios.post('http://localhost:2019/add',
+      axios.post('http://localhost:8042/instances',
           formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
             }
           },
-        ).then(function (response) {
-          console.log('SUCCESS!!');
+        ).then(function () {
+          console.log('Success!');
         })
-        .catch(function () {
-          console.log('FAILURE!!');
+        .catch(function (error) {
+          console.log(error.message);
         });
     }
   }

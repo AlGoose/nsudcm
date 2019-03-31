@@ -5,12 +5,12 @@
       <vuescroll :ops="ops">
 
         <v-flex v-for="(item, index) in employees" :key="index" xs12 class="card">
-          <v-card hover flat color="cyan darken-2" class="white--text">
+          <v-card flat color="cyan darken-2" class="white--text">
             <v-layout>
               <!-- <v-flex xs5>
                 <v-img src="https://cdn.vuetifyjs.com/images/cards/foster.jpg" height="125px" contain></v-img>
               </v-flex> -->
-              <v-flex xs12>
+              <v-flex xs12 class="userCard" @click="selectUser(index)">
                 <v-card-title primary-title>
                   <div>
                     <div class="headline">{{item.surname + ' ' + item.name}}</div>
@@ -31,9 +31,9 @@
       <vuescroll :ops="ops">
 
         <v-flex v-for="(item, index) in patients" :key="index" xs12 class="card">
-          <v-card hover flat color="cyan darken-2" class="white--text" @click="showInfo(index)">
-            <v-layout row wrap>
-              <v-flex xs11>
+          <v-card flat color="cyan darken-2" class="white--text" >
+            <v-layout row wrap class="instanceCard">
+              <v-flex xs11 @click="showInfo(index)">
                 <v-card-title primary-title>
                   <div>
                     <div class="headline">{{item.data.PatientName}}</div>
@@ -46,7 +46,7 @@
                 </v-card-title>
               </v-flex>
               <v-flex xs1>
-                <v-checkbox dark color="white" light v-model="selected" :value="instancesIDS[index]"></v-checkbox>
+                <v-checkbox dark color="white" light v-model="selectedInstances" :value="instancesIDS[index]"></v-checkbox>
               </v-flex>
             </v-layout>
           </v-card>
@@ -75,7 +75,7 @@
 
         <v-flex sm12>
           <ul>
-            <li v-for="item in selected">
+            <li v-for="item in selectedInstances">
               {{ item }}
             </li>
           </ul>
@@ -88,30 +88,19 @@
   <div class="text-xs-center">
     <v-dialog v-model="dialog" width="500">
       <template v-slot:activator="{ on }">
-        <v-btn depressed color="success" block dark v-on="on">
-          Explore
-        </v-btn>
+        <v-btn depressed color="success" block dark v-on="on">Explore</v-btn>
       </template>
 
       <v-card>
-        <v-card-title class="headline grey lighten-2" primary-title>
-          Ваша ссылка
-        </v-card-title>
-
-        <v-card-text>
-          [ССЫЛКА]
-        </v-card-text>
-
+        <v-card-title class="headline grey lighten-2" primary-title>Подтверждение</v-card-title>
+        <v-card-text>Вы уверены в выборе?</v-card-text>
         <v-divider></v-divider>
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="success" flat @click="sendMail">
-            Отправить
-          </v-btn>
-          <v-btn color="primary" flat @click="dialog = false">
-            Закрыть
-          </v-btn>
+          <v-btn v-if="loading" color="success" flat loading></v-btn>
+          <v-btn v-else color="success" flat @click="sendMail()">Отправить</v-btn>
+          <v-btn color="primary" flat @click="dialog = false">Закрыть</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -130,6 +119,7 @@ export default {
   data() {
     return {
       dialog: false,
+      loading: false,
       ops: {
         vuescroll: {
           mode: 'native',
@@ -144,7 +134,7 @@ export default {
           keepShow: true,
         },
       },
-      selected: [],
+      selectedInstances: [],
       patientsIDS: null,
       instancesIDS: null,
       patients: [],
@@ -155,8 +145,12 @@ export default {
         instanceid: '',
       },
       employees: null,
+      selectedUserIndex: 1,
+      selectedInstanceIndex: 1,
+      selectedUserEmail: null
     }
   },
+
   created() {
     var self = this;
     axios
@@ -168,8 +162,6 @@ export default {
             .get('http://localhost:8042/instances/' + element + '/simplified-tags')
             .then(function(res) {
               self.patients.push(res);
-              // eslint-disable-next-line
-              console.log(res);
             })
             .catch(function(err) {
               // eslint-disable-next-line
@@ -183,11 +175,9 @@ export default {
       });
 
     axios
-        .get('http://localhost:2019/employees/')
+        .get('http://localhost:2019/api/employees/')
         .then(function(res) {
           self.employees = res.data;
-          // eslint-disable-next-line
-          console.log(self.employees);
         })
         .catch(function(err) {
           // eslint-disable-next-line
@@ -196,7 +186,18 @@ export default {
   },
 
   methods: {
+    selectUser(index) {
+      document.getElementsByClassName('userCard')[this.selectedUserIndex].style.background = '';
+      document.getElementsByClassName('userCard')[index].style.background = '#4ab14f';
+      this.selectedUserIndex = index;
+      this.selectedUserEmail = this.employees[index].email;
+    },
+
     showInfo(index) {
+      document.getElementsByClassName('instanceCard')[this.selectedInstanceIndex].style.background = '';
+      document.getElementsByClassName('instanceCard')[index].style.background = '#4ab14f';
+      this.selectedInstanceIndex = index;
+
       this.selectedPatient = {
         name: this.patients[index].data.PatientName,
         id: this.patients[index].data.PatientID,
@@ -204,24 +205,29 @@ export default {
         instanceid: this.instancesIDS[index],
       }
     },
+
     sendMail() {
+      if(this.selectedInstances.length == 0 || this.selectedUserEmail == null) {
+        alert('Не выбрана болезнь(-ни) или исследователь!');
+        this.dialog = false;
+        return;
+      }
+
+      this.loading = true;
       var self = this;
-      var json = JSON.stringify(this.instancesIDS);
+      var json = JSON.stringify(this.selectedInstances);
       let objJsonB64 = Buffer.from(json).toString("base64");
-      // eslint-disable-next-line
-      console.log(json.toString('base64'));
 
       const sgMail = require('@sendgrid/mail');
       sgMail.setApiKey(process.env.VUE_APP_SENDGRID_API_KEY);
       const msg = {
-        to: 'alex1232131@mail.ru',
+        to: this.selectedUserEmail,
         from: 'alex@nsudcm.com',
-        subject: 'Sending with SendGrid is Fun',
-        // text: 'and easy to do anywhere, even with Node.js',
+        subject: 'Research Files',
         html: '<p>Here’s an attachment for you!</p>',
         attachments: [{
           content: objJsonB64,
-          filename: 'attachment.json',
+          filename: 'research.json',
           type: 'application/json',
           disposition: 'attachment',
           content_id: 'mytext'
@@ -234,19 +240,21 @@ export default {
           // eslint-disable-next-line
           console.log("Success!");
           self.dialog = false;
+          self.loading = false;
         })
         .catch(error => {
           // eslint-disable-next-line
           console.log("Failed!");
           // eslint-disable-next-line
           console.error(error.toString());
+          self.loading = false;
         });
     }
   }
 }
 </script>
 
-<style>
+<style scoped>
 .myWrap {
   width: 100%;
   height: 100%;
@@ -291,6 +299,10 @@ export default {
   margin: auto;
   margin-bottom: 2%;
   margin-top: 2%;
+}
+
+.userCard:hover, .instanceCard:hover {
+  background: #4ab14f;
 }
 
 .myCheck {
