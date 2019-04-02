@@ -7,9 +7,6 @@
         <v-flex v-for="(item, index) in employees" :key="index" xs12 class="card">
           <v-card flat color="cyan darken-2" class="white--text">
             <v-layout>
-              <!-- <v-flex xs5>
-                <v-img src="https://cdn.vuetifyjs.com/images/cards/foster.jpg" height="125px" contain></v-img>
-              </v-flex> -->
               <v-flex xs12 class="userCard" @click="selectUser(index)">
                 <v-card-title primary-title>
                   <div>
@@ -20,7 +17,6 @@
                 </v-card-title>
               </v-flex>
             </v-layout>
-
           </v-card>
         </v-flex>
 
@@ -75,7 +71,7 @@
 
         <v-flex sm12>
           <ul>
-            <li v-for="item in selectedInstances">
+            <li v-for="(item, index) in selectedInstances" :key="index">
               {{ item }}
             </li>
           </ul>
@@ -145,8 +141,8 @@ export default {
         instanceid: '',
       },
       employees: null,
-      selectedUserIndex: 1,
-      selectedInstanceIndex: 1,
+      selectedUserIndex: 0,
+      selectedInstanceIndex: 0,
       selectedUserEmail: null
     }
   },

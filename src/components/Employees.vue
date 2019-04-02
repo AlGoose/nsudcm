@@ -1,63 +1,65 @@
 <template>
-<div class="table">
-  <v-toolbar flat color="white">
-    <v-toolbar-title>My Employees</v-toolbar-title>
-    <v-divider class="mx-2" inset vertical></v-divider>
-    <v-spacer></v-spacer>
-    <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
-    <v-dialog v-model="dialog" max-width="500px">
-      <template v-slot:activator="{ on }">
-        <v-btn color="primary" dark class="mb-2" v-on="on">Add</v-btn>
+<div class="myWrap">
+  <div class="table">
+    <v-toolbar color="white">
+      <v-toolbar-title>My Employees</v-toolbar-title>
+      <v-divider class="mx-2" inset vertical></v-divider>
+      <v-spacer></v-spacer>
+      <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+      <v-dialog v-model="dialog" max-width="500px">
+        <template v-slot:activator="{ on }">
+          <v-btn color="primary" dark class="mb-2" v-on="on">Add</v-btn>
+        </template>
+        <v-card>
+          <v-card-title>
+            <span class="headline">{{ formTitle }}</span>
+          </v-card-title>
+
+          <v-card-text>
+            <v-container grid-list-md>
+              <v-layout wrap>
+                <v-flex xs6>
+                  <v-text-field v-model="editedItem.surname" label="Фамилия"></v-text-field>
+                </v-flex>
+                <v-flex xs6>
+                  <v-text-field v-model="editedItem.name" label="Имя"></v-text-field>
+                </v-flex>
+                <v-flex xs6>
+                  <v-text-field v-model="editedItem.patronymic" label="Отчество"></v-text-field>
+                </v-flex>
+                <v-flex xs6>
+                  <v-text-field v-model="editedItem.position" label="Должность"></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-text-field v-model="editedItem.email" label="Почта"></v-text-field>
+                </v-flex>
+              </v-layout>
+            </v-container>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" flat @click="close">Cancel</v-btn>
+            <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-toolbar>
+
+    <v-data-table :headers="headers" :items="desserts" :search="search" class="elevation-1">
+      <template v-slot:items="props">
+        <td>{{ props.item.surname }}</td>
+        <td class="text-xs-left">{{ props.item.name }}</td>
+        <td class="text-xs-left">{{ props.item.patronymic }}</td>
+        <td class="text-xs-left">{{ props.item.position }}</td>
+        <td class="text-xs-left">{{ props.item.email }}</td>
+        <td class="justify-left layout px-0">
+          <v-icon small class="mr-2" @click="editItem(props.item)">edit</v-icon>
+          <v-icon small @click="deleteItem(props.item)">delete</v-icon>
+        </td>
       </template>
-      <v-card>
-        <v-card-title>
-          <span class="headline">{{ formTitle }}</span>
-        </v-card-title>
-
-        <v-card-text>
-          <v-container grid-list-md>
-            <v-layout wrap>
-              <v-flex xs6>
-                <v-text-field v-model="editedItem.surname" label="Фамилия"></v-text-field>
-              </v-flex>
-              <v-flex xs6>
-                <v-text-field v-model="editedItem.name" label="Имя"></v-text-field>
-              </v-flex>
-              <v-flex xs6>
-                <v-text-field v-model="editedItem.patronymic" label="Отчество"></v-text-field>
-              </v-flex>
-              <v-flex xs6>
-                <v-text-field v-model="editedItem.position" label="Должность"></v-text-field>
-              </v-flex>
-              <v-flex xs12>
-                <v-text-field v-model="editedItem.email" label="Почта"></v-text-field>
-              </v-flex>
-            </v-layout>
-          </v-container>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click="close">Cancel</v-btn>
-          <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-toolbar>
-
-  <v-data-table :headers="headers" :items="desserts" :search="search" class="elevation-1">
-    <template v-slot:items="props">
-      <td>{{ props.item.surname }}</td>
-      <td class="text-xs-left">{{ props.item.name }}</td>
-      <td class="text-xs-left">{{ props.item.patronymic }}</td>
-      <td class="text-xs-left">{{ props.item.position }}</td>
-      <td class="text-xs-left">{{ props.item.email }}</td>
-      <td class="justify-left layout px-0">
-        <v-icon small class="mr-2" @click="editItem(props.item)">edit</v-icon>
-        <v-icon small @click="deleteItem(props.item)">delete</v-icon>
-      </td>
-    </template>
-  </v-data-table>
+    </v-data-table>
+  </div>
 </div>
 </template>
 
@@ -129,8 +131,8 @@ export default {
   created() {
     let self = this;
     axios
-    .get('http://localhost:2019/api/employees',)
-    .then(function (res) {
+      .get('http://localhost:2019/api/employees',)
+      .then(function (res) {
         self.desserts = res.data;
       })
       .catch(function (err) {
@@ -150,14 +152,9 @@ export default {
       let self = this;
       const index = this.desserts.indexOf(item)
       if(confirm('Вы точно хотите удалить?')){
-        let data = JSON.stringify(item._id);
-        axios.delete('http://localhost:2019/api/employees/' + item._id,
-            data, {
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            },
-          ).then(function () {
+        axios
+          .delete('http://localhost:2019/api/employees/' + item._id,)
+          .then(function () {
             self.desserts.splice(index, 1)
           })
           .catch(function (err) {
@@ -178,14 +175,9 @@ export default {
     save() {
       let self = this;
       if (this.editedIndex > -1) {
-        let data = JSON.stringify(this.editedItem);
-        axios.put('http://localhost:2019/api/employees',
-            data, {
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            },
-          ).then(function (res) {
+        axios
+          .put('http://localhost:2019/api/employees', self.editedItem)
+          .then(function (res) {
             Object.assign(self.desserts[self.editedIndex], res.data)
           })
           .catch(function (err) {
@@ -193,15 +185,10 @@ export default {
             console.log(err.message);
           });
       } else {
-        let data = JSON.stringify(this.editedItem);
-        axios.post('http://localhost:2019/api/employees',
-            data, {
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            },
-          ).then(function (res) {
-            self.desserts.push(res.data)
+        axios
+          .post('http://localhost:2019/api/employees',self.editedItem)
+          .then(function (res) {
+            self.desserts.push(res.data[0]);
           })
           .catch(function (err) {
             // eslint-disable-next-line
@@ -216,6 +203,7 @@ export default {
 
 <style>
   .table {
+    margin-top: 1%;
     margin-left: 10%;
     width: 80%;
   }
