@@ -1,13 +1,86 @@
 <template>
-<div class="myWrap">
-  <div class="content">
-    <div class="one">
-      <vuescroll :ops="ops">
+<div class="main">
+  <div class="instance-block">
+    <div class="tags">
+      <div id="search">
+        <scrolly class="foo" :style="{ width: '100%', height: '100%'}">
+          <scrolly-viewport>
+            <v-combobox v-model="tags" label="Tags" chips clearable solo multiple>
+              <template v-slot:selection="data">
+                <v-chip :selected="data.selected" color="light-green" text-color="white" close @input="remove(data.item)">
+                  <strong>{{ data.item }}</strong>&nbsp;
+                </v-chip>
+              </template>
+            </v-combobox>
+          </scrolly-viewport>
+          <scrolly-bar axis="y"></scrolly-bar>
+        </scrolly>
+      </div>
+      <div id="button">
+        <v-btn id="searchButton" depressed color="success" @click="search">Search</v-btn>
+      </div>
+    </div>
 
+    <scrolly class="foo" :style="{ width: '100%', height: '80%', border: '1px solid black'}">
+      <scrolly-viewport>
+        <v-flex v-for="(item, index) in instancesIDS" :key="index" xs12 class="card">
+          <v-card flat color="cyan darken-2" class="white--text">
+            <v-layout  id="card" row wrap class="instanceCard">
+              <v-flex xs11 @click="showInfo(item.instanceID, index)">
+                <v-card-title primary-title>
+                  <div>
+                    <div class="headline">{{item.instanceID}}</div>
+                    <v-chip disabled v-for="item in item.tags" :key="item.id" color="light-green lighten-5" text-color="black">{{ item }}</v-chip>
+                  </div>
+                </v-card-title>
+              </v-flex>
+              <v-flex xs1>
+                <v-checkbox dark color="white" light v-model="selectedInstances" :value="instancesIDS[index].instanceID"></v-checkbox>
+              </v-flex>
+            </v-layout>
+          </v-card>
+        </v-flex>
+      </scrolly-viewport>
+      <scrolly-bar axis="y"></scrolly-bar>
+    </scrolly>
+  </div>
+
+  <div class="content-block">
+    <div class="box">
+      <v-flex sm12>
+        <v-text-field :value="selectedPatient.name" label="Name" outline readonly></v-text-field>
+      </v-flex>
+
+      <v-flex sm12>
+        <v-text-field :value="selectedPatient.id" label="ID" outline readonly></v-text-field>
+      </v-flex>
+
+      <v-flex sm12>
+        <v-text-field :value="selectedPatient.sex" label="Sex" outline readonly></v-text-field>
+      </v-flex>
+
+      <v-flex sm12>
+        <v-text-field :value="selectedPatient.instanceid" label="InstanceID" outline readonly></v-text-field>
+      </v-flex>
+
+      <v-flex sm12>
+        <ul>
+          <li v-for="(item, index) in selectedInstances" :key="index">
+            {{ item }}
+          </li>
+        </ul>
+      </v-flex>
+
+    </div>
+  </div>
+
+  <div class="user-block">
+    <scrolly class="foo" :style="{ width: '100%', height: '99%'}">
+      <scrolly-viewport>
         <v-flex v-for="(item, index) in employees" :key="index" xs12 class="card">
           <v-card flat color="cyan darken-2" class="white--text">
             <v-layout>
-              <v-flex xs12 class="userCard" @click="selectUser(index)">
+              <v-flex xs12 class="userCard" id="card" @click="selectUser(index)">
                 <v-card-title primary-title>
                   <div>
                     <div class="headline">{{item.surname + ' ' + item.name}}</div>
@@ -19,69 +92,12 @@
             </v-layout>
           </v-card>
         </v-flex>
-
-      </vuescroll>
-    </div>
-
-    <div class="two">
-      <vuescroll :ops="ops">
-
-        <v-flex v-for="(item, index) in patients" :key="index" xs12 class="card">
-          <v-card flat color="cyan darken-2" class="white--text" >
-            <v-layout row wrap class="instanceCard">
-              <v-flex xs11 @click="showInfo(index)">
-                <v-card-title primary-title>
-                  <div>
-                    <div class="headline">{{item.data.PatientName}}</div>
-
-                    <!-- <div>{{item.data.MainDicomTags.PatientID}}</div>
-                    <div>{{item.data.MainDicomTags.PatientSex}}</div> -->
-                    <!-- <div><v-checkbox dark color="white" light v-model="selected" :value="item.data.MainDicomTags.PatientID"></v-checkbox></div> -->
-
-                  </div>
-                </v-card-title>
-              </v-flex>
-              <v-flex xs1>
-                <v-checkbox dark color="white" light v-model="selectedInstances" :value="instancesIDS[index]"></v-checkbox>
-              </v-flex>
-            </v-layout>
-          </v-card>
-        </v-flex>
-
-      </vuescroll>
-    </div>
-
-    <div class="three">
-      <div class="box">
-        <v-flex sm12>
-          <v-text-field :value="selectedPatient.name" label="Name" outline readonly></v-text-field>
-        </v-flex>
-
-        <v-flex sm12>
-          <v-text-field :value="selectedPatient.id" label="ID" outline readonly></v-text-field>
-        </v-flex>
-
-        <v-flex sm12>
-          <v-text-field :value="selectedPatient.sex" label="Sex" outline readonly></v-text-field>
-        </v-flex>
-
-        <v-flex sm12>
-          <v-text-field :value="selectedPatient.instanceid" label="InstanceID" outline readonly></v-text-field>
-        </v-flex>
-
-        <v-flex sm12>
-          <ul>
-            <li v-for="(item, index) in selectedInstances" :key="index">
-              {{ item }}
-            </li>
-          </ul>
-        </v-flex>
-
-      </div>
-    </div>
+      </scrolly-viewport>
+      <scrolly-bar axis="y"></scrolly-bar>
+    </scrolly>
   </div>
 
-  <div class="text-xs-center">
+  <div class="button-block">
     <v-dialog v-model="dialog" width="500">
       <template v-slot:activator="{ on }">
         <v-btn depressed color="success" block dark v-on="on">Explore</v-btn>
@@ -105,31 +121,19 @@
 </template>
 
 <script>
-import vuescroll from 'vuescroll'
-import axios from 'axios'
+import axios from 'axios';
+import { Scrolly, ScrollyViewport, ScrollyBar } from 'vue-scrolly';
 
 export default {
   components: {
-    vuescroll
+    Scrolly,
+    ScrollyViewport,
+    ScrollyBar
   },
   data() {
     return {
       dialog: false,
       loading: false,
-      ops: {
-        vuescroll: {
-          mode: 'native',
-          sizeStrategy: 'percent',
-          detectResize: true
-        },
-        scrollPanel: {
-          scrollingX: false,
-        },
-        rail: {},
-        bar: {
-          keepShow: true,
-        },
-      },
       selectedInstances: [],
       patientsIDS: null,
       instancesIDS: null,
@@ -143,27 +147,39 @@ export default {
       employees: null,
       selectedUserIndex: 0,
       selectedInstanceIndex: 0,
-      selectedUserEmail: null
+      selectedUserEmail: null,
+      tags: []
     }
   },
 
   created() {
     var self = this;
+    // axios
+    //   .get('http://localhost:8042/instances/')
+    //   .then(function(res) {
+    //     self.instancesIDS = res.data;
+    //     self.instancesIDS.forEach(function(element) {
+    //       axios
+    //         .get('http://localhost:8042/instances/' + element + '/simplified-tags')
+    //         .then(function(res) {
+    //           self.patients.push(res);
+    //         })
+    //         .catch(function(err) {
+    //           // eslint-disable-next-line
+    //           console.log(err.message);
+    //         });
+    //     })
+    //   })
+    //   .catch(function(err) {
+    //     // eslint-disable-next-line
+    //     console.log(err.message);
+    //   });
     axios
-      .get('http://localhost:8042/instances/')
+      .get('http://localhost:2019/api/instances/')
       .then(function(res) {
+        // eslint-disable-next-line
+        console.log(res.data);
         self.instancesIDS = res.data;
-        self.instancesIDS.forEach(function(element) {
-          axios
-            .get('http://localhost:8042/instances/' + element + '/simplified-tags')
-            .then(function(res) {
-              self.patients.push(res);
-            })
-            .catch(function(err) {
-              // eslint-disable-next-line
-              console.log(err.message);
-            });
-        })
       })
       .catch(function(err) {
         // eslint-disable-next-line
@@ -182,6 +198,34 @@ export default {
   },
 
   methods: {
+    search() {
+      if(this.instancesIDS){
+        document.getElementsByClassName('instanceCard')[this.selectedInstanceIndex].style.background = '';
+        this.selectedInstanceIndex = 0;
+      }
+
+      this.selectedInstances = [];
+      this.instancesIDS = [];
+
+      let self = this;
+      axios
+        .post('http://localhost:2019/api/instances/tags', self.tags)
+        .then(function(res) {
+          // eslint-disable-next-line
+          // console.log(res.data);
+          self.instancesIDS = res.data;
+        })
+        .catch(function(err) {
+          // eslint-disable-next-line
+          console.log(err.message);
+        });
+    },
+
+    remove(item) {
+      this.tags.splice(this.tags.indexOf(item), 1)
+      this.tags = [...this.tags]
+    },
+
     selectUser(index) {
       document.getElementsByClassName('userCard')[this.selectedUserIndex].style.background = '';
       document.getElementsByClassName('userCard')[index].style.background = '#4ab14f';
@@ -189,17 +233,28 @@ export default {
       this.selectedUserEmail = this.employees[index].email;
     },
 
-    showInfo(index) {
-      document.getElementsByClassName('instanceCard')[this.selectedInstanceIndex].style.background = '';
-      document.getElementsByClassName('instanceCard')[index].style.background = '#4ab14f';
-      this.selectedInstanceIndex = index;
-
-      this.selectedPatient = {
-        name: this.patients[index].data.PatientName,
-        id: this.patients[index].data.PatientID,
-        sex: this.patients[index].data.PatientSex,
-        instanceid: this.instancesIDS[index],
+    showInfo(id, index) {
+      // let self = this;
+      if(document.getElementsByClassName('instanceCard')){
+        document.getElementsByClassName('instanceCard')[this.selectedInstanceIndex].style.background = '';
+        document.getElementsByClassName('instanceCard')[index].style.background = '#4ab14f';
+        this.selectedInstanceIndex = index;
       }
+      // axios
+      //     .get('http://localhost:8042/instances/' + id + '/simplified-tags')
+      //     .then(function(res) {
+      //       self.selectedPatient = {
+      //         name: res.data.PatientName,
+      //         id: res.data.PatientID,
+      //         sex: res.data.PatientSex,
+      //         instanceid: id,
+      //       }
+      //       console.log(res);
+      //     })
+      //     .catch(function(err) {
+      //       // eslint-disable-next-line
+      //       console.log(err.message);
+      //     });
     },
 
     sendMail() {
@@ -251,63 +306,68 @@ export default {
 </script>
 
 <style scoped>
-.myWrap {
-  width: 100%;
-  height: 100%;
-  /* border: 3px dashed #645a4e; */
+html, body {margin:0;padding:0;}
+.main {
+    margin:0 auto;
+    width:100%;
+    height: 100%;
 }
-
-.content {
-  /* background: black; */
-  position: relative;
-  height: 85%;
+.main .instance-block,.content-block,.user-block  {
+    display:inline-block;
+    vertical-align:top;
 }
-
-.one {
-  /* background: yellow; */
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 30%;
-  height: 100%;
+.instance-block {
+    /* background:red; */
+    width:30%;
+    height:92%;
 }
-
-.two {
-  /* background: blue; */
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 30%;
-  height: 100%;
+.content-block {
+    /* background:green; */
+    width:40%;
+    height:92%;
 }
-
-.three {
-  /* background: pink; */
-  position: absolute;
-  top: 0;
-  left: 30%;
-  width: 40%;
-  height: 100%;
+.user-block {
+    /* background:blue; */
+    width:30%;
+    height:92%;
 }
-
+.button-block {
+  /* background:pink; */
+  width:100%;
+  height:5%;
+}
 .card {
   width: 90%;
   margin: auto;
   margin-bottom: 2%;
   margin-top: 2%;
 }
-
-.userCard:hover, .instanceCard:hover {
+.card #card:hover{
   background: #4ab14f;
 }
-
-.myCheck {
-  /* margin-right: 5%; */
-  margin-top: 15%;
-  margin-left: 10%;
+.tags {
+  width: 100%;
+  height: 20%;
+  /* background: black; */
 }
-
+.tags #search {
+  width: 100%;
+  height: 70%;
+  /* background: yellow; */
+}
+.tags #button {
+  width: 100%;
+  height: 30%;
+}
+#button #searchButton {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
 .box {
-  margin: 1.6%;
+   margin: 2%;
+}
+.foo {
+  border-radius: 10px;
 }
 </style>

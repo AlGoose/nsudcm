@@ -67,6 +67,7 @@ export default {
             },
           )
         .then(function (res) {
+          console.log(res.data);
           axios
             .post('http://localhost:2019/api/instances',
             {
