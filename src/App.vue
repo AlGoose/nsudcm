@@ -1,7 +1,7 @@
 <template>
 <div id="footer">
   <v-app id="inspire">
-    <v-footer height="auto" color="green">
+    <v-footer height="auto" color="green" v-if="!this.$route.path.includes('sample')">
       <v-layout justify-center row wrap>
         <v-btn to="/" color="white" flat round exact>Home</v-btn>
         <v-btn to="/upload" color="white" flat round exact>Upload</v-btn>
@@ -24,6 +24,7 @@ import Upload from './components/Upload'
 import Search from './components/Search'
 import Research from './components/Research'
 import Employees from './components/Employees'
+import Sample from './components/Sample'
 
 Vue.use(VueRouter)
 
@@ -47,6 +48,10 @@ const router = new VueRouter({
     {
       path: '/employees',
       component: Employees
+    },
+    {
+      path: '/sample/:id',
+      component: Sample
     }
   ]
 })

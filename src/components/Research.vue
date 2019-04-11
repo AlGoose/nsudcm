@@ -148,6 +148,7 @@ export default {
       selectedUserIndex: 0,
       selectedInstanceIndex: 0,
       selectedUserEmail: null,
+      selectedUser: null,
       tags: []
     }
   },
@@ -231,6 +232,7 @@ export default {
       document.getElementsByClassName('userCard')[index].style.background = '#4ab14f';
       this.selectedUserIndex = index;
       this.selectedUserEmail = this.employees[index].email;
+      this.selectedUser = this.employees[index];
     },
 
     showInfo(id, index) {
@@ -264,42 +266,58 @@ export default {
         return;
       }
 
-      this.loading = true;
-      var self = this;
-      var json = JSON.stringify(this.selectedInstances);
-      let objJsonB64 = Buffer.from(json).toString("base64");
-
-      const sgMail = require('@sendgrid/mail');
-      sgMail.setApiKey(process.env.VUE_APP_SENDGRID_API_KEY);
-      const msg = {
-        to: this.selectedUserEmail,
-        from: 'alex@nsudcm.com',
-        subject: 'Research Files',
-        html: '<p>Here’s an attachment for you!</p>',
-        attachments: [{
-          content: objJsonB64,
-          filename: 'research.json',
-          type: 'application/json',
-          disposition: 'attachment',
-          content_id: 'mytext'
-        }, ],
-      };
-
-      sgMail
-        .send(msg)
-        .then(() => {
-          // eslint-disable-next-line
-          console.log("Success!");
-          self.dialog = false;
-          self.loading = false;
+      let name = this.selectedUser.surname + ' ' + this.selectedUser.name + ' ' + this.selectedUser.patronymic
+      console.log(name);
+      axios
+        .post('http://localhost:2019/api/samples', {
+          username: name,
+          instances: this.selectedInstances
         })
-        .catch(error => {
+        .then(function(res) {
           // eslint-disable-next-line
-          console.log("Failed!");
+          console.log(res.data);
+          console.log('http://localhost:2019/api/samples/' + res.data[0]._id);
+        })
+        .catch(function(err) {
           // eslint-disable-next-line
-          console.error(error.toString());
-          self.loading = false;
+          console.log(err.message);
         });
+      // this.loading = true;
+      // var self = this;
+      // var json = JSON.stringify(this.selectedInstances);
+      // let objJsonB64 = Buffer.from(json).toString("base64");
+      //
+      // const sgMail = require('@sendgrid/mail');
+      // sgMail.setApiKey(process.env.VUE_APP_SENDGRID_API_KEY);
+      // const msg = {
+      //   to: this.selectedUserEmail,
+      //   from: 'alex@nsudcm.com',
+      //   subject: 'Research Files',
+      //   html: '<p>Here’s an attachment for you!</p>',
+      //   attachments: [{
+      //     content: objJsonB64,
+      //     filename: 'research.json',
+      //     type: 'application/json',
+      //     disposition: 'attachment',
+      //     content_id: 'mytext'
+      //   }, ],
+      // };
+      //
+      // sgMail
+      //   .send(msg)
+      //   .then(() => {
+      //     // eslint-disable-next-line
+      //     console.log("Success!");
+      //     self.dialog = false;
+      //     self.loading = false;
+      //   })
+      //   .catch(error => {
+      //     // eslint-disable-next-line
+      //     console.log("Failed!");
+      //     // eslint-disable-next-line
+      //     console.error(error.toString());
+      //     self.loading = false;
+      //   });
     }
   }
 }
