@@ -123,6 +123,12 @@
 <script>
 import axios from 'axios';
 import { Scrolly, ScrollyViewport, ScrollyBar } from 'vue-scrolly';
+import Vue from 'vue'
+import VueNotification from "@kugatsu/vuenotification";
+
+Vue.use(VueNotification, {
+  position: 'bottomRight'
+});
 
 export default {
   components: {
@@ -135,9 +141,9 @@ export default {
       dialog: false,
       loading: false,
       selectedInstances: [],
-      patientsIDS: null,
+      // patientsIDS: null,
       instancesIDS: null,
-      patients: [],
+      // patients: [],
       selectedPatient: {
         name: '',
         id: '',
@@ -149,7 +155,8 @@ export default {
       selectedInstanceIndex: 0,
       selectedUserEmail: null,
       selectedUser: null,
-      tags: []
+      tags: [],
+      sampleID: null,
     }
   },
 
@@ -266,58 +273,69 @@ export default {
         return;
       }
 
+      let self = this;
       let name = this.selectedUser.surname + ' ' + this.selectedUser.name + ' ' + this.selectedUser.patronymic
-      console.log(name);
       axios
         .post('http://localhost:2019/api/samples', {
           username: name,
           instances: this.selectedInstances
         })
         .then(function(res) {
-          // eslint-disable-next-line
-          console.log(res.data);
-          console.log('http://localhost:2019/api/samples/' + res.data[0]._id);
+          self.loading = true;
+          self.sampleID = res.data[0]._id;
+          const sgMail = require('@sendgrid/mail');
+          sgMail.setApiKey(process.env.VUE_APP_SENDGRID_API_KEY);
+          const msg = {
+            to: self.selectedUserEmail,
+            from: 'alex@nsudcm.com',
+            subject: 'Research Files',
+            html: 'http://localhost:2019/api/samples/' + self.sampleID,
+          };
+
+          sgMail
+            .send(msg)
+            .then(() => {
+              self.$notification.success("Success");
+              self.dialog = false;
+              self.loading = false;
+            })
+            .catch(error => {
+              self.$notification.error("Can't send e-mail! Check correctness!");
+              // eslint-disable-next-line
+              console.error(error.toString());
+              self.loading = false;
+              self.dialog = false;
+              axios
+                .delete('http://localhost:2019/api/samples/' + self.sampleID)
+                .then(function () {
+                  // eslint-disable-next-line
+                  console.log('Canceled!');
+                })
+                .catch(function (error) {
+                  // eslint-disable-next-line
+                  console.log(error.message);
+                  self.$notification.error("Can't delete info from database");
+                })
+            });
         })
         .catch(function(err) {
+          self.$notification.error("Can't write info to database or something go wrong!");
           // eslint-disable-next-line
           console.log(err.message);
+          self.loading = false;
+          self.dialog = false;
+          axios
+            .delete('http://localhost:2019/api/samples/' + self.sampleID)
+            .then(function () {
+              // eslint-disable-next-line
+              console.log('Canceled!');
+            })
+            .catch(function (error) {
+              // eslint-disable-next-line
+              console.log(error.message);
+              self.$notification.error("Can't delete info from database");
+            })
         });
-      // this.loading = true;
-      // var self = this;
-      // var json = JSON.stringify(this.selectedInstances);
-      // let objJsonB64 = Buffer.from(json).toString("base64");
-      //
-      // const sgMail = require('@sendgrid/mail');
-      // sgMail.setApiKey(process.env.VUE_APP_SENDGRID_API_KEY);
-      // const msg = {
-      //   to: this.selectedUserEmail,
-      //   from: 'alex@nsudcm.com',
-      //   subject: 'Research Files',
-      //   html: '<p>Here’s an attachment for you!</p>',
-      //   attachments: [{
-      //     content: objJsonB64,
-      //     filename: 'research.json',
-      //     type: 'application/json',
-      //     disposition: 'attachment',
-      //     content_id: 'mytext'
-      //   }, ],
-      // };
-      //
-      // sgMail
-      //   .send(msg)
-      //   .then(() => {
-      //     // eslint-disable-next-line
-      //     console.log("Success!");
-      //     self.dialog = false;
-      //     self.loading = false;
-      //   })
-      //   .catch(error => {
-      //     // eslint-disable-next-line
-      //     console.log("Failed!");
-      //     // eslint-disable-next-line
-      //     console.error(error.toString());
-      //     self.loading = false;
-      //   });
     }
   }
 }

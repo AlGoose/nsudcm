@@ -46,7 +46,7 @@
       </v-dialog>
     </v-toolbar>
 
-    <v-data-table :headers="headers" :items="desserts" :search="search" class="elevation-1">
+    <v-data-table :headers="headers" :items="employees" :search="search" class="elevation-1" :rows-per-page-items="pagination">
       <template v-slot:items="props">
         <td>{{ props.item.surname }}</td>
         <td class="text-xs-left">{{ props.item.name }}</td>
@@ -70,6 +70,7 @@ export default {
   data: () => ({
     search: '',
     dialog: false,
+    pagination: [10,25,{"text":"$vuetify.dataIterator.rowsPerPageAll","value":-1}],
     headers: [{
         text: 'Фамилия',
         value: 'surname'
@@ -98,7 +99,7 @@ export default {
         sortable: false
       }
     ],
-    desserts: [],
+    employees: [],
     editedIndex: -1,
     editedItem: {
       surname: '',
@@ -133,7 +134,7 @@ export default {
     axios
       .get('http://localhost:2019/api/employees',)
       .then(function (res) {
-        self.desserts = res.data;
+        self.employees = res.data;
       })
       .catch(function (err) {
         // eslint-disable-next-line
@@ -143,19 +144,19 @@ export default {
 
   methods: {
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item)
+      this.editedIndex = this.employees.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
 
     deleteItem(item) {
       let self = this;
-      const index = this.desserts.indexOf(item)
+      const index = this.employees.indexOf(item)
       if(confirm('Вы точно хотите удалить?')){
         axios
           .delete('http://localhost:2019/api/employees/' + item._id,)
           .then(function () {
-            self.desserts.splice(index, 1)
+            self.employees.splice(index, 1)
           })
           .catch(function (err) {
             // eslint-disable-next-line
@@ -178,7 +179,7 @@ export default {
         axios
           .put('http://localhost:2019/api/employees', self.editedItem)
           .then(function (res) {
-            Object.assign(self.desserts[self.editedIndex], res.data)
+            Object.assign(self.employees[self.editedIndex], res.data)
           })
           .catch(function (err) {
             // eslint-disable-next-line
@@ -188,7 +189,7 @@ export default {
         axios
           .post('http://localhost:2019/api/employees',self.editedItem)
           .then(function (res) {
-            self.desserts.push(res.data[0]);
+            self.employees.push(res.data[0]);
           })
           .catch(function (err) {
             // eslint-disable-next-line
