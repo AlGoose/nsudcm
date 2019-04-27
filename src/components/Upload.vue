@@ -21,7 +21,6 @@
     </v-combobox>
 
     <v-btn class="button" depressed color="success" @click="submitFile">Submit</v-btn>
-
   </div>
 </div>
 </template>
