@@ -162,31 +162,9 @@ export default {
 
   created() {
     var self = this;
-    // axios
-    //   .get('http://localhost:8042/instances/')
-    //   .then(function(res) {
-    //     self.instancesIDS = res.data;
-    //     self.instancesIDS.forEach(function(element) {
-    //       axios
-    //         .get('http://localhost:8042/instances/' + element + '/simplified-tags')
-    //         .then(function(res) {
-    //           self.patients.push(res);
-    //         })
-    //         .catch(function(err) {
-    //           // eslint-disable-next-line
-    //           console.log(err.message);
-    //         });
-    //     })
-    //   })
-    //   .catch(function(err) {
-    //     // eslint-disable-next-line
-    //     console.log(err.message);
-    //   });
     axios
       .get('http://localhost:2019/api/instances/')
       .then(function(res) {
-        // eslint-disable-next-line
-        console.log(res.data);
         self.instancesIDS = res.data;
       })
       .catch(function(err) {
@@ -243,27 +221,27 @@ export default {
     },
 
     showInfo(id, index) {
-      // let self = this;
+      let self = this;
       if(document.getElementsByClassName('instanceCard')){
         document.getElementsByClassName('instanceCard')[this.selectedInstanceIndex].style.background = '';
         document.getElementsByClassName('instanceCard')[index].style.background = '#4ab14f';
         this.selectedInstanceIndex = index;
       }
-      // axios
-      //     .get('http://localhost:8042/instances/' + id + '/simplified-tags')
-      //     .then(function(res) {
-      //       self.selectedPatient = {
-      //         name: res.data.PatientName,
-      //         id: res.data.PatientID,
-      //         sex: res.data.PatientSex,
-      //         instanceid: id,
-      //       }
-      //       console.log(res);
-      //     })
-      //     .catch(function(err) {
-      //       // eslint-disable-next-line
-      //       console.log(err.message);
-      //     });
+
+      axios
+          .get('http://localhost:2019/api/instances/' + id)
+          .then(function(res) {
+            self.selectedPatient = {
+              name: res.data.PatientName,
+              id: res.data.PatientID,
+              sex: res.data.PatientSex,
+              instanceid: id,
+            }
+          })
+          .catch(function(err) {
+            // eslint-disable-next-line
+            console.log(err.message);
+          });
     },
 
     sendMail() {
