@@ -58,6 +58,7 @@ export default {
       
       let formData = new FormData();
       formData.append('file', this.selectedFile);
+      formData.append('tags', this.tags);
 
       axios
         .post('http://localhost:2019/api/instances',
