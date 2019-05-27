@@ -70,6 +70,7 @@ export default {
           )
         .then(function () {
           self.selectedFile = null;
+          self.tags = [];
           self.$notification.success("Success");
         })
         .catch(function (error) {

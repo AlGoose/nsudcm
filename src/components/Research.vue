@@ -21,7 +21,7 @@
         </div>
       </div>
 
-      <scrolly class="foo" :style="{ width: '100%', height: '80%', border: '1px solid black'}">
+      <scrolly class="foo" :style="{ width: '100%', height: '80%', border: '1px solid white'}">
         <scrolly-viewport>
           <v-flex v-for="(item, index) in instancesIDS" :key="index" xs12 class="card">
             <v-card flat color="cyan darken-2" class="white--text">
@@ -33,6 +33,11 @@
                       <v-chip disabled v-for="item in item.tags" :key="item.id" color="light-green lighten-5" text-color="black">{{ item }}</v-chip>
                     </div>
                   </v-card-title>
+                  <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="white" depressed @click="editItem(item,index)">Edit</v-btn>
+                  <v-btn color="white" depressed @click="deleteItem(item, index)">Delete</v-btn>
+                </v-card-actions>
                 </v-flex>
                 <v-flex xs1>
                   <v-checkbox dark color="white" light v-model="selectedInstances" :value="instancesIDS[index].instanceID"></v-checkbox>
@@ -43,6 +48,32 @@
         </scrolly-viewport>
         <scrolly-bar axis="y"></scrolly-bar>
       </scrolly>
+
+      <v-dialog v-model="editDialog" max-width="500px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Edit Tags</span>
+          </v-card-title>
+
+          <v-card-text>
+            <v-container grid-list-md>
+              <v-combobox v-model="selectedInstanceTags" label="Your tags" chips clearable solo multiple>
+                <template v-slot:selection="data">
+                  <v-chip :selected="data.selected" color="light-green" text-color="white" close @input="removeEditTag(data.item)">
+                    <strong>{{ data.item }}</strong>&nbsp;
+                  </v-chip>
+                </template>
+               </v-combobox>
+            </v-container>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" flat @click="close">Cancel</v-btn>
+            <v-btn color="blue darken-1" flat @click="save">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </div>
 
     <div class="content-block">
@@ -135,12 +166,13 @@ export default {
   },
   data() {
     return {
+      editDialog: false,
       dialog: false,
       loading: false,
       selectedInstances: [],
-      // patientsIDS: null,
+      selectedInstanceTags: null,
+      selectedIndex: null,
       instancesIDS: null,
-      // patients: [],
       selectedPatient: {
         name: "",
         id: "",
@@ -270,6 +302,61 @@ export default {
           self.dialog = false;
           self.loading = false;
         });
+    },
+
+    deleteItem(item) {
+      var self = this;
+
+      self.instancesIDS.splice(this.instancesIDS.indexOf(item), 1)
+      self.instancesIDS = [...this.instancesIDS]
+
+      console.log(item._id);
+      console.log("http://localhost:2019/api/instances/" + item._id);
+      if(confirm('Вы точно хотите удалить?')) {
+      axios
+        .delete("http://localhost:2019/api/instances/" + item._id)
+        .then(function() {
+          self.$notification.success("Deleted");
+        })
+        .catch(function(err) {
+          // eslint-disable-next-line
+          console.log(err.message);
+        });
+      }
+    },
+
+    editItem(item,index) {
+      this.selectedInstanceTags = item.tags;
+      this.selectedIndex = index;
+      this.editDialog = true;
+    },
+    
+    close() {
+      this.editDialog = false
+    },
+
+    save() {
+      var self = this;
+      var tmp = this.instancesIDS[this.selectedIndex];
+      tmp.tags = this.selectedInstanceTags;
+
+      axios
+      .put("http://localhost:2019/api/instances/", tmp)
+      .then(function(){
+        self.instancesIDS[self.selectedIndex].tags = self.selectedInstanceTags;
+        self.$notification.success("Edited");
+        self.editDialog = false;
+      })
+      .catch(function(){
+        // eslint-disable-next-line
+        console.log(err.message);
+        self.$notification.error("Can't edit");
+      });
+    },
+
+    removeEditTag(item) {
+      this.selectedInstanceTags.splice(this.selectedInstanceTags.indexOf(item), 1);
+      this.selectedInstanceTags = [...this.selectedInstanceTags];
     }
   }
 };
