@@ -190,7 +190,7 @@ export default {
   },
 
   created() {
-    var self = this;
+    let self = this;
     axios
       .get("http://localhost:2019/api/instances/")
       .then(function(res) {
@@ -214,22 +214,15 @@ export default {
 
   methods: {
     search() {
-      if (this.instancesIDS) {
-        document.getElementsByClassName("instanceCard")[
-          this.selectedInstanceIndex
-        ].style.background = "";
-        this.selectedInstanceIndex = 0;
-      }
-
+      let self = this;
+      this.selectedInstanceIndex = 0;
       this.selectedInstances = [];
       this.instancesIDS = [];
 
-      let self = this;
       axios
         .post("http://localhost:2019/api/instances/tags", self.tags)
         .then(function(res) {
           // eslint-disable-next-line
-          // console.log(res.data);
           self.instancesIDS = res.data;
         })
         .catch(function(err) {
@@ -305,17 +298,14 @@ export default {
     },
 
     deleteItem(item) {
-      var self = this;
+      let self = this;
 
-      self.instancesIDS.splice(this.instancesIDS.indexOf(item), 1)
-      self.instancesIDS = [...this.instancesIDS]
-
-      console.log(item._id);
-      console.log("http://localhost:2019/api/instances/" + item._id);
       if(confirm('Вы точно хотите удалить?')) {
       axios
         .delete("http://localhost:2019/api/instances/" + item._id)
         .then(function() {
+          self.instancesIDS.splice(self.instancesIDS.indexOf(item), 1)
+          self.instancesIDS = [...self.instancesIDS]
           self.$notification.success("Deleted");
         })
         .catch(function(err) {
@@ -336,8 +326,8 @@ export default {
     },
 
     save() {
-      var self = this;
-      var tmp = this.instancesIDS[this.selectedIndex];
+      let self = this;
+      let tmp = this.instancesIDS[this.selectedIndex];
       tmp.tags = this.selectedInstanceTags;
 
       axios
